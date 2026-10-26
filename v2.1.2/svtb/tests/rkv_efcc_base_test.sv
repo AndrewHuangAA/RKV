@@ -31,17 +31,23 @@
 class rkv_efcc_base_test;
 
     rkv_efcc_env env;
+    lvc_mem mem;
+    int unsigned cmp_count, err_count;
     virtual lvc_apb_interface apb_vif;
-    static int unsigned cmp_count, err_count;
+    virtual lvc_sram_interface sram_vif;
 
     virtual function void build();
         env = new();
         env.build(); //會去例化apb_init
     endfunction
     
-    virtual function void connect(input virtual lvc_apb_interface apb_vif);
-        this.apb_vif = apb_vif
+    virtual function void connect(input virtual lvc_apb_interface   apb_vif
+                                  input virtual lvc_ssram_interface sram_vif);
+        this.apb_vif = apb_vif;
+        this.sram_vif = sram_vif;
         env.apb_init.assign_if(apb_vif);
+        env.sram_trgt.assign_if(sram_vif);
+        mem = env.sram_trgt.mem; 
     endfunction
 
     virtual task post_run();
@@ -101,35 +107,35 @@ class rkv_efcc_base_test;
         $display(msg);
     endfunction
 
-    task void set_efcc_enable(input bit en = 1);
+    virtual task void set_efcc_enable(input bit en = 1);
         efcc_top_control_reg_struct top_control;
         apb_read(EFCC_TOP_CONTROL_REG_ADDR, top_control);
         top_control.efcc_en = en;
         apb_write(EFCC_TOP_CONTROL_REG_ADDR, top_control);
     endtask
 
-    task void set_work_mode(input trans_mode_e mode);
+    virtual task void set_work_mode(input trans_mode_e mode);
         efcc_top_control_reg_struct top_control;
         apb_read(EFCC_TOP_CONTROL_REG_ADDR, top_control);
         top_control.work_mode = mode;
         apb_write(EFCC_TOP_CONTROL_REG_ADDR, top_control);
     endtask
 
-    task void set_pio_enable(input bit en = 1);
+    virtual task void set_pio_enable(input bit en = 1);
         efcc_top_control_reg_struct top_control;
         apb_read(EFCC_TOP_CONTROL_REG_ADDR, top_control);
         top_control.pio_en_we = en;
         apb_write(EFCC_TOP_CONTROL_REG_ADDR, top_control);
     endtask
 
-    task void set_pio_rw_sel(input trans_kind_e rw);
+    virtual task void set_pio_rw_sel(input trans_kind_e rw);
         efcc_top_control_reg_struct top_control;
         apb_read(EFCC_TOP_CONTROL_REG_ADDR, top_control);
         top_control.pio_rw_sel = rw;
         apb_write(EFCC_TOP_CONTROL_REG_ADDR, top_control);
     endtask
 
-    task pio_write_packet(input rkv_efcc_transaction t);
+    virtual task pio_write_packet(input rkv_efcc_transaction t);
         foreach(t.data_array[i]) begin
           case(i)
             t.data_array().size-1 : apb_write(EFCC_TB_TAIL_REG_ADDR , t.data_array[i]); // 怕TAIL被誤寫入DW
@@ -153,7 +159,7 @@ class rkv_efcc_base_test;
         end
     endtask
 
-    task pio_read_packet(input rkv_efcc_transaction t);
+    virtual task pio_read_packet(input rkv_efcc_transaction t);
         apb_read(EFCC_RB_L1DES_REG_ADDR, t.l1des);
         t.generate_payload(); // 先把pl清0，讓後面foreach的data_array能裝讀出來的pl
         foreach(t.data_array[i]) begin
@@ -183,7 +189,7 @@ class rkv_efcc_base_test;
 
     // PUSH是脈衝訊號，觸發的時候就開始動作把DONE=1
     // 直到完成後DONE為0
-    task pio_tb_push_wait_done(input rkv_efcc_transaction t);
+    virtual task pio_tb_push_wait_done(input rkv_efcc_transaction t);
         efcc_tb_ctrl_reg_struct tb_ctrl;
         tb_ctrl.push = 1;
         apb_write(EFCC_TB_CTRL_REG_ADDR, tb_ctrl); // 給PUSH訊號用write
@@ -193,7 +199,7 @@ class rkv_efcc_base_test;
         end while(!tb_ctrl.done);
     endtask
 
-    task pio_rb_pop_wait_done(input rkv_efcc_transaction t);
+    virtual task pio_rb_pop_wait_done(input rkv_efcc_transaction t);
         efcc_rb_ctrl_reg_struct rb_ctrl;
         rb_ctrl.pop = 1;
         apb_write(EFCC_RB_CTRL_REG_ADDR, rb_ctrl); // 給POP訊號用write
@@ -203,10 +209,86 @@ class rkv_efcc_base_test;
         end while(!rb_ctrl.done);
     endtask
 
-    task wait_cycles(input n);
+    virtual task wait_cycles(input n);
         repeat(n) @(posedge apb_vif.clk_i);
     endtask
 
+    virtual function void bd_write_pkt_array(efcc_tr_arr tr_arr);
+      foreach(tr_arr[i])
+        foreach(tr_arr[i].data_array[j])
+          bd_write_word(tr_arr[i].addr + j*4, tr_arr[i].data_array[j]);
+    endfunction
+
+    virtual function efcc_tr_arr bd_read_pkt_array(int unsigned addr, int unsigned pkt_num);
+      int data_arr_size;
+      efcc_tr_arr tr_arr = new[pkt_num];
+      foreach(tr_arr[i]) begin
+        tr_arr[i] = new();
+        if(i == 0)
+          tr_arr[i].addr = addr;
+        else
+          tr_arr[i].addr = tr_arr[i-1].addr + tr_arr[i-1].get_size();
+        tr_arr[i].l1des = bd_read_word(tr_arr[i].addr);
+        data_arr_size = tr_arr[i].l1des.layer2 ? tr_arr[i].l1des.length + 3 : tr_arr[i].l1des.length + 2;
+        tr_arr[i].data_array = new[data_arr_size];
+        foreach(tr_arr[i].data_array[j])
+          tr_arr[i].data_array[j] = bd_read_word(tr_arr[i].addr + 4*j);
+        if(tr_arr[i].l1des.layer2)
+          tr_arr[i].l2des = tr_arr[i].data_array[1];
+        tr_arr[i].tail = tr_arr[i].data_array[data_arr_size - 1];
+      end
+      return tr_arr;
+    endfunction
+
+    virtual function void bd_write_word(bit [31:0] addr, bit [31:0] data);
+      mem.write(addr, data);
+    endfunction
+
+    virtual function bit [31:0] bd_read_word(bit [31:0] addr);
+      return mem.read(addr);
+    endfunction
+
+    virtual function void setup_reg_dma_mode(trans_kind_e kind, bit[3:0] pkt_num, bit[31:0] addr, bit ch);
+        efcc_ch_ctrl_reg_struct ch_ctrl;
+        efcc_top_control_reg_struct top_control;
+        efcc_intr_en_reg_struct intr_en;
+
+        // Enable DMA Interrupt
+        intr_en.ch0_done_en = 1;
+        intr_en.ch1_done_en = 1;
+        apb_write(EFCC_INTR_EN_REG_ADDR, intr_en);
+
+        // Get Top Control Reg Value
+        apb_read(EFCC_TOP_CONTROL_REG_ADDR, top_control);
+
+        case(kind)
+          POP : begin
+            top_control.dma_rw_sel = ch == 0 ? 1 : 0;
+            ch_ctrl.dst_pkt_num = pkt_num - 1;
+            if(ch == 0) begin
+              apb_write(EFCC_CH0_CTRL_REG_ADDR, ch_ctrl);
+              apb_write(EFCC_CH0_DADDR_REG_ADDR, addr);
+            end
+            else begin
+              apb_write(EFCC_CH1_CTRL_REG_ADDR, ch_ctrl);
+              apb_write(EFCC_CH1_DADDR_REG_ADDR, addr);
+            end
+          end
+          PUSH : begin
+            top_control.dma_rw_sel = ch == 0 ? 0 : 1;
+            ch_ctrl.src_pkt_num = pkt_num - 1;
+            if(ch == 0) begin
+              apb_write(EFCC_CH0_CTRL_REG_ADDR, ch_ctrl);
+              apb_write(EFCC_CH0_SADDR_REG_ADDR, addr);
+            end
+            else begin
+              apb_write(EFCC_CH1_CTRL_REG_ADDR, ch_ctrl);
+              apb_write(EFCC_CH1_SADDR_REG_ADDR, addr);
+            end
+          end
+        endcase
+    endfunction
+      
 endclass
 
 

@@ -30,6 +30,7 @@
 module rkv_efcc_tb;
 
   import lvc_apb_pkg::*;
+  import lvc_sram_pkg::*;
   import rkv_efcc_pkg::*;
   `include "rkv_efcc_defines.svh" // 因為 rkv_efcc_csr_fifo_in_reg_test.sv 裡面的force，所有造成pkg跟test暫時分開編譯
 
@@ -50,31 +51,32 @@ module rkv_efcc_tb;
 
   rkv_efcc_top dut(
   // system signals
-  .clk_i                (clk           ),
-  .rstn_i               (rstn          ),
+  .clk_i                (clk            ),
+  .rstn_i               (rstn           ),
   // apb signals
-  .psel_i               (apb_if.psel   ),
-  .penable_i            (apb_if.penable),
-  .paddr_i              (apb_if.paddr  ),
-  .pwdata_i             (apb_if.pwdata ),
-  .pwrite_i             (apb_if.pwrite ),
-  .prdata_o             (apb_if.prdata ),
-  .pready_o             (apb_if.pready ),
-  .pslverr_o            (apb_if.pslverr),
+  .psel_i               (apb_if.psel    ),
+  .penable_i            (apb_if.penable ),
+  .paddr_i              (apb_if.paddr   ),
+  .pwdata_i             (apb_if.pwdata  ),
+  .pwrite_i             (apb_if.pwrite  ),
+  .prdata_o             (apb_if.prdata  ),
+  .pready_o             (apb_if.pready  ),
+  .pslverr_o            (apb_if.pslverr ),
   // sram signals
-  .efcc_sram2dma_doa_i  ('0            ),
-  .efcc_sram2dma_dob_i  ('0            ),
-  .efcc_dma2sram_ena_o  (              ),
-  .efcc_dma2sram_wea_o  (              ),
-  .efcc_dma2sram_addra_o(              ),
-  .efcc_dma2sram_dia_o  (              ),
-  .efcc_dma2sram_enb_o  (              ),
-  .efcc_dma2sram_web_o  (              ),
-  .efcc_dma2sram_addrb_o(              ),
-  .efcc_dma2sram_dib_o  (              )
+  .efcc_sram2dma_doa_i  (sram_if.doa    ),
+  .efcc_sram2dma_dob_i  (sram_if.dob    ),
+  .efcc_dma2sram_ena_o  (sram_if.ena    ),
+  .efcc_dma2sram_wea_o  (sram_if.wea    ),
+  .efcc_dma2sram_addra_o(sram_if.addra  ),
+  .efcc_dma2sram_dia_o  (sram_if.dia    ),
+  .efcc_dma2sram_enb_o  (sram_if.enb    ),
+  .efcc_dma2sram_web_o  (sram_if.web    ),
+  .efcc_dma2sram_addrb_o(sram_if.addrb  ),
+  .efcc_dma2sram_dib_o  (sram_if.dib    )
   );
 
   lvc_apb_interface apb_if(clk, rstn);
+  lvc_sram_interface sram_if(clk, clk);
 
   lvc_apb_master_initiator apb_init;
 
@@ -114,12 +116,15 @@ module rkv_efcc_tb;
                                             rkv_efcc_pio_directed_test        test = new();
                                             base_test = test;
                                             end
-
+      "rkv_efcc_dma_directed_test"        : begin 
+                                            rkv_efcc_dma_directed_test        test = new();
+                                            base_test = test;
+                                            end
       default: $fatal("Test Name [%s] Unrecognized!", testname);
     endcase
     base_test.build();
     // base_test.apb_vif = apb_if;  // 頂部傳下來給test，test再connect
-    base_test.connect(apb_if);      // 頂部傳下來給test，test再connect
+    base_test.connect(apb_if, sram_if);      // 頂部傳下來給test，test再connect
     base_test.run();
     base_test.post_run();  // 就等1us
     base_test.report();

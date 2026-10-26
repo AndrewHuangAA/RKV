@@ -42,6 +42,39 @@ typedef struct packed {
     bit [ 7: 0] pid     ;  // Packet L1DES PID for filtering[cite: 4]
 } efcc_top_filter_id_reg_struct;
 
+// INTR_STATUS register (Address: 0x0018)
+typedef struct packed{
+  bit [31: 6] reserved;
+  bit [ 5: 5] fmt_err;          // Format error interrupt flag
+  bit [ 4: 4] crc_err;          // CRC error interrupt flag
+  bit [ 3: 3] fifo_out_overrun; // FIFO-OUT overrun interrupt flag
+  bit [ 2: 2] fifo_in_overrun;  // FIFO-IN overrun interrupt flag
+  bit [ 1: 1] ch1_done;         // Channel1 DMA completion interrupt flag
+  bit [ 0: 0] ch0_done;         // Channel0 DMA completion interrupt flag
+} efcc_intr_status_reg_struct;
+
+// INTR_EN register (Address: 0x001C)
+typedef struct packed{
+  bit [31: 6] reserved;
+  bit [ 5: 5] fmt_err_en;       // Format error interrupt enable
+  bit [ 4: 4] crc_err_en;       // CRC error interrupt enable
+  bit [ 3: 3] fifo_out_ovrn_en; // FIFO-OUT overrun interrupt enable
+  bit [ 2: 2] fifo_in_ovrn_en;  // FIFO-IN overrun interrupt enable
+  bit [ 1: 1] ch1_done_en;      // Channel1 DMA completion interrupt enable
+  bit [ 0: 0] ch0_done_en;      // Channel0 DMA completion interrupt enable
+} efcc_intr_en_reg_struct;
+
+// INTR_CLR register (Address: 0x0020)
+typedef struct packed{
+  bit [31: 6] reserved;
+  bit [ 5: 5] fmt_err_clr;      // Format error interrupt clear
+  bit [ 4: 4] crc_err_clr;      // CRC error interrupt clear
+  bit [ 3: 3] fifo_out_ovrn_clr;// FIFO-OUT overrun interrupt clear
+  bit [ 2: 2] fifo_in_ovrn_clr; // FIFO-IN overrun interrupt clear
+  bit [ 1: 1] ch1_done_clr;     // Channel1 DMA completion interrupt clear
+  bit [ 0: 0] ch0_done_clr;     // Channel0 DMA completion interrupt clear
+} efcc_intr_clr_reg_struct;
+
 // PIO Registers
 parameter int unsigned EFCC_TB_L1DES_REG_ADDR     = 32'h0100;
 parameter int unsigned EFCC_TB_DW1_REG_ADDR       = 32'h0104;
@@ -99,6 +132,19 @@ parameter int unsigned EFCC_CH1_SADDR_REG_ADDR    = 32'h0210;
 parameter int unsigned EFCC_CH1_DADDR_REG_ADDR    = 32'h0214;
 parameter int unsigned EFCC_CH1_CTRL_REG_ADDR     = 32'h0218;
 parameter int unsigned EFCC_CH1_STAT_REG_ADDR     = 32'h021C;
+
+typedef struct packed{
+  bit [31: 7] reserved;
+  bit [ 6: 6] suspend;      // Channel suspend control
+  bit [ 5: 3] dst_pkt_num;  // Destination packet number
+  bit [ 2: 0] src_pkt_num;  // Source packet number
+} efcc_ch_ctrl_reg_struct;
+
+typedef struct packed{
+  bit [31: 6] reserved;
+  bit [ 5: 3] dst_send_num;  // Sent packets count
+  bit [ 2: 0] src_fetch_num; // Fetched packets count
+} efcc_ch_stat_reg_struct;
 
 // DP Registers
 parameter int unsigned EFCC_DP_CONTROL_REG_ADDR   = 32'h0300;

@@ -59,5 +59,6 @@ typedef struct packed {
   logic [ 7: 0] pkt_end; // 8 bits
 } tail_t;
 
+typedef rkv_efcc_transaction efcc_tr_arr [];
 
 `endif // RKV_EFCC_DEFINES_SV

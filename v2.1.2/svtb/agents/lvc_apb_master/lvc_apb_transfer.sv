@@ -18,7 +18,7 @@
 // Version     : 1.0
 //
 // Description :
-// - APB transcation
+// - APB transaction
 //
 // Revision History:
 // Date        Version    Change Description

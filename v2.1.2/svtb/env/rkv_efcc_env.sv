@@ -31,12 +31,14 @@
 class rkv_efcc_env;
 
     lvc_apb_master_initiator apb_init;
+    lvc_sram_slave_target sram_trgt;
     
     function new();
     endfunction
 
     function void build();
         apb_init = new();
+        sram_trgt = new();
     endfunction
 endclass
 

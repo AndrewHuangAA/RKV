@@ -39,6 +39,8 @@ class rkv_efcc_transaction;
     // bit [31:0] addr;
     // bit [ 3:0] pkt_num;
 
+    bit [31:0] addr; // packet start address in SRAM (dma)
+
     function new();
         // L1DES default/random value
         l1des.head      = 8'hD1;
@@ -99,6 +101,10 @@ class rkv_efcc_transaction;
                 default : data_array[i] = pl_rand ? $urandom() : 0; // PL
             endcase
         end
+    endfunction
+
+    function int get_size();
+      return data_array.size() * 4;
     endfunction
 
 endclass

@@ -30,7 +30,7 @@
 
 class lvc_apb_master_initiator;
 
-  virtual interface lvc_apb_interface vif;
+  virtual lvc_apb_interface vif;
   
   function new();
   endfunction

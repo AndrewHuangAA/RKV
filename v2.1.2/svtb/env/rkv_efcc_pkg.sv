@@ -31,10 +31,13 @@
 package rkv_efcc_pkg;
 
     import lvc_apb_pkg::*;
+    import lvc_sram_pkg::*;    
+
     `include "rkv_efcc_env.sv"
     `include "rkv_efcc_tests.svh"
     `include "rkv_efcc_reg_defines.svh"
-    // `include "rkv_efcc_defines.svh"
+    `include "rkv_efcc_defines.svh"
+    `include "rkv_efcc_transaction.sv"
 
 endpackage
 
