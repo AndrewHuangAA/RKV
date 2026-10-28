@@ -94,9 +94,9 @@ class rkv_efcc_transaction;
         data_array = new[dsize];
         foreach(data_array[i]) begin
             case(i)
+                dsize-1 : data_array[i] = tail        // TAIL
                 0       : data_array[i] = l1des;      // L1DES
                 1       : data_array[i] = l1des.layer2 == 1 ? l2des : (pl_rand ? $urandom() : 0);// layer2為1此位就是l2des，否則看pl_rand為1自己隨機當作dw1，pl_rand為0就設定為0
-                dsize-1 : data_array[i] = tail        // TAIL
                 default : data_array[i] = pl_rand ? $urandom() : 0; // PL
             endcase
         end

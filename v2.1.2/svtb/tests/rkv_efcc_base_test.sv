@@ -55,6 +55,9 @@ class rkv_efcc_base_test;
     endtask
 
     virtual task run();
+        fork
+          env.run();
+        join_none
         env.apb_init.do_reset();
         @(posedge apb_vif.rstn_i);
         repeat(5) @(posedge apb_vif.clk_i);
@@ -250,7 +253,7 @@ class rkv_efcc_base_test;
       return mem.read(addr);
     endfunction
 
-    virtual function void setup_reg_dma_mode(trans_kind_e kind, bit[3:0] pkt_num, bit[31:0] addr, bit ch);
+    virtual task void setup_reg_dma_mode(trans_kind_e kind, bit[3:0] pkt_num, bit[31:0] addr, bit ch);
         efcc_ch_ctrl_reg_struct ch_ctrl;
         efcc_top_control_reg_struct top_control;
         efcc_intr_en_reg_struct intr_en;
@@ -289,7 +292,14 @@ class rkv_efcc_base_test;
             end
           end
         endcase
-    endfunction
+        // Trigger DMA channel data transfer
+        top_control.intr_en = 1;
+        if(ch == 0)
+            top_control.ch0_en_we = 1;
+        else
+            top_control.ch1_en_we = 1;
+        apb_write(EFCC_TOP_CONTROL_REG_ADDR, top_control);
+    endtask
 
     function bit compare_packet_array(efcc_tr_arr arr1, efcc_tr_arr arr2);
       cmp_count++; //compare size

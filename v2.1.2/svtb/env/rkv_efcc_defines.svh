@@ -28,7 +28,8 @@
 `ifndef RKV_EFCC_DEFINES_SV
 `define RKV_EFCC_DEFINES_SV
 
-typedef enum bit      {PUSH = 0   , POP = 1    } trans_kind_e; // PUSH: external -> EFCC, POP: EFCC -> external
+// PUSH: external -> EFCC, POP: EFCC -> external (pio、dma)
+typedef enum bit      {PUSH = 0   , POP = 1    } trans_kind_e; 
 typedef enum bit[1:0] {PIO = 2'b00, DMA = 2'b01} trans_mode_e;
 
 // L1DES (Layer 1 Descriptor) - 32 bits
@@ -59,6 +60,7 @@ typedef struct packed {
   logic [ 7: 0] pkt_end; // 8 bits
 } tail_t;
 
+typedef class rkv_efcc_transaction;
 typedef rkv_efcc_transaction efcc_tr_arr [];
 
 `endif // RKV_EFCC_DEFINES_SV

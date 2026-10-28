@@ -40,6 +40,13 @@ class rkv_efcc_env;
         apb_init = new();
         sram_trgt = new();
     endfunction
+
+    task run();
+        fork
+            apb_init.run();
+            sram_trgt.run();
+        join_none
+    endtask
 endclass
 
 `endif // RKV_EFCC_ENV_SV

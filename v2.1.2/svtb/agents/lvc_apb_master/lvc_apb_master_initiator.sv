@@ -35,6 +35,9 @@ class lvc_apb_master_initiator;
   function new();
   endfunction
 
+  task run();
+  endtask
+
   function void assign_if(input virtual lvc_apb_interface vif); //默認是input
     this.vif = vif;
   endfunction
