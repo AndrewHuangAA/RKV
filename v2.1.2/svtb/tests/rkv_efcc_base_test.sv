@@ -216,12 +216,14 @@ class rkv_efcc_base_test;
     virtual function void bd_write_pkt_array(efcc_tr_arr tr_arr);
       foreach(tr_arr[i])
         foreach(tr_arr[i].data_array[j])
+          // 第1個addr就是l1des，第2個就是pl/l2des...
           bd_write_word(tr_arr[i].addr + j*4, tr_arr[i].data_array[j]);
     endfunction
 
     virtual function efcc_tr_arr bd_read_pkt_array(int unsigned addr, int unsigned pkt_num);
       int data_arr_size;
       efcc_tr_arr tr_arr = new[pkt_num];
+
       foreach(tr_arr[i]) begin
         tr_arr[i] = new();
         if(i == 0)
@@ -262,10 +264,10 @@ class rkv_efcc_base_test;
         apb_read(EFCC_TOP_CONTROL_REG_ADDR, top_control);
 
         case(kind)
-          POP : begin
+          POP : begin // 硬體處理完後，要將資料POP From Sel to SRAM，所以要給他目的位址
             top_control.dma_rw_sel = ch == 0 ? 1 : 0;
             ch_ctrl.dst_pkt_num = pkt_num - 1;
-            if(ch == 0) begin
+            if(ch == 0) begin // 選擇要用ch0/ch1讀出來
               apb_write(EFCC_CH0_CTRL_REG_ADDR, ch_ctrl);
               apb_write(EFCC_CH0_DADDR_REG_ADDR, addr);
             end
@@ -274,10 +276,10 @@ class rkv_efcc_base_test;
               apb_write(EFCC_CH1_DADDR_REG_ADDR, addr);
             end
           end
-          PUSH : begin
+          PUSH : begin // 把資料從SRAM PUSH to FLT，那應該是給他SRAM的來源地址
             top_control.dma_rw_sel = ch == 0 ? 0 : 1;
             ch_ctrl.src_pkt_num = pkt_num - 1;
-            if(ch == 0) begin
+            if(ch == 0) begin // 選擇要用ch0/ch1寫進去
               apb_write(EFCC_CH0_CTRL_REG_ADDR, ch_ctrl);
               apb_write(EFCC_CH0_SADDR_REG_ADDR, addr);
             end
@@ -288,7 +290,31 @@ class rkv_efcc_base_test;
           end
         endcase
     endfunction
-      
+
+    function bit compare_packet_array(efcc_tr_arr arr1, efcc_tr_arr arr2);
+      cmp_count++; //compare size
+      if(arr1.size() != arr2.size()) begin
+        err_count++;
+        $error("Compared Packet Array Size Mismatch, Array1 Size [%0d], Array2 Size [%0d]", arr1.size(), arr2.size());
+        return 0;
+      end
+      else begin
+        foreach(arr1[i]) begin
+          cmp_count++;
+          if(!arr1[i].compare(arr2[i])) begin
+            err_count++;
+            $error("TX packet compared RX packet FAILURE!");
+            arr1[i].print();
+            arr2[i].print();
+            return 0;
+          end
+          else
+            $display("TX packet compared RX packet SUCCESS!");
+        end
+      end
+      return 1;
+    endfunction
+
 endclass
 
 

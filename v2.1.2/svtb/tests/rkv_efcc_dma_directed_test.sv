@@ -28,12 +28,12 @@ class rkv_efcc_dma_directed_test extends rkv_efcc_base_test;
       bd_write_pkt_array(wr_tr_arr);
 
       // Select a channel and do data transfer with check
-      // Channel Read
+      // Channel 0/1 PUSH
       ch = $urandom_range(0, 1);
       setup_reg_dma_mode(PUSH, pkt_num, src_addr, ch);
       #1us;
 
-      // Channel Write
+      // Channel 0/1 POP
       ch = $urandom_range(0, 1);
       setup_reg_dma_mode(POP, pkt_num, dst_addr, ch);
       #1us;
@@ -51,43 +51,18 @@ class rkv_efcc_dma_directed_test extends rkv_efcc_base_test;
   
   function efcc_tr_arr prepare_packet_array(int unsigned size = 0);
     int array_size = (size == 0) ? $urandom_range(1, 8) : size ;
-    efcc_tr_arr tr_arr[] = new[array_size];
+    efcc_tr_arr tr_arr[] = new[array_size];  // new a object array
     foreach (tr_arr[i]) begin
-      tr_arr[i] = new();
-      tr_arr[i].generate_playload(1); 
-      if(i=0)
+      tr_arr[i] = new();                     // new a object in object array
+      tr_arr[i].generate_payload(1); 
+      if(i==0)
         tr_arr[i].addr = src_addr;
       else
+        // data_array.size()是總共有幾筆資料，一筆資料是4byte(32 bits)，所以下個位置是幾筆資料*4個位置後
         tr_arr[i].addr = tr_arr[i-1].addr + tr_arr[i-1].get_size();
     end
     return tr_arr;
   endfunction
-
-  function bit compare_packet_array(efcc_tr_arr arr1, efcc_tr_arr arr2);
-    cmp_count++; //compare size
-    if(arr1.size() != arr2.size()) begin
-      err_count++;
-      $error("Compared Packet Array Size Mismatch, Array1 Size [%0d], Array2 Size [%0d]", arr1.size(), arr2.size());
-      return 0;
-    end
-    else begin
-      foreach(arr1[i]) begin
-        cmp_count++;
-        if(!arr1[i].compare(arr2[i])) begin
-          err_count++;
-          $error("TX packet compared RX packet FAILURE!");
-          arr1[i].print();
-          arr2[i].print();
-          return 0;
-        end
-        else
-          $display("TX packet compared RX packet SUCCESS!");
-      end
-    end
-    return 1;
-  endfunction
- 
-  
 
 endclass
 

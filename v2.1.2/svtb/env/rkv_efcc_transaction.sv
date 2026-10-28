@@ -38,8 +38,7 @@ class rkv_efcc_transaction;
     bit [31:0] data_array[];
     // bit [31:0] addr;
     // bit [ 3:0] pkt_num;
-
-    bit [31:0] addr; // packet start address in SRAM (dma)
+    bit [31:0] addr; // packet start address in SRAM (dma)，use to put src/dst data
 
     function new();
         // L1DES default/random value
@@ -103,7 +102,8 @@ class rkv_efcc_transaction;
         end
     endfunction
 
-    function int get_size();
+    function int get_size(); 
+      // data_array.size()是總共有幾筆資料，一筆資料是4byte(32 bits)，所以下個位置是幾筆資料*4個位置後
       return data_array.size() * 4;
     endfunction
 
