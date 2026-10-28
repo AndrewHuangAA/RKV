@@ -270,11 +270,11 @@ class rkv_efcc_base_test;
           POP : begin // 硬體處理完後，要將資料POP From Sel to SRAM，所以要給他目的位址
             top_control.dma_rw_sel = ch == 0 ? 1 : 0;
             ch_ctrl.dst_pkt_num = pkt_num - 1;
-            if(ch == 0) begin // 選擇要用ch0/ch1讀出來
+            if(ch == 0) begin // 0就是0讀1寫
               apb_write(EFCC_CH0_CTRL_REG_ADDR, ch_ctrl);
               apb_write(EFCC_CH0_DADDR_REG_ADDR, addr);
             end
-            else begin
+            else begin        // 1就是1讀0寫
               apb_write(EFCC_CH1_CTRL_REG_ADDR, ch_ctrl);
               apb_write(EFCC_CH1_DADDR_REG_ADDR, addr);
             end
@@ -282,11 +282,11 @@ class rkv_efcc_base_test;
           PUSH : begin // 把資料從SRAM PUSH to FLT，那應該是給他SRAM的來源地址
             top_control.dma_rw_sel = ch == 0 ? 0 : 1;
             ch_ctrl.src_pkt_num = pkt_num - 1;
-            if(ch == 0) begin // 選擇要用ch0/ch1寫進去
+            if(ch == 0) begin // 0就是0讀1寫
               apb_write(EFCC_CH0_CTRL_REG_ADDR, ch_ctrl);
               apb_write(EFCC_CH0_SADDR_REG_ADDR, addr);
             end
-            else begin
+            else begin        // 1就是1讀0寫
               apb_write(EFCC_CH1_CTRL_REG_ADDR, ch_ctrl);
               apb_write(EFCC_CH1_SADDR_REG_ADDR, addr);
             end
