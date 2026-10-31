@@ -301,6 +301,44 @@ class rkv_efcc_base_test;
         apb_write(EFCC_TOP_CONTROL_REG_ADDR, top_control);
     endtask
 
+    // rw_sel, 0 : CH0 Read, CH1 Write, 1: CH0 Write, CH1 Read
+    virtual task setup_reg_dma_dual_chnl(bit rw_sel, bit[3:0] pkt_num, bit[31:0] src_addr, bit[31:0] dst_addr);
+      efcc_ch_ctrl_reg_struct ch_ctrl;
+      efcc_top_control_reg_struct top_control;
+      efcc_intr_en_reg_struct intr_en;
+
+      // Enable DMA Interrupt
+      intr_en.ch0_done_en = 1;
+      intr_en.ch1_done_en = 1;
+      apb_write(EFCC_INTR_EN_REG_ADDR, intr_en);
+
+      ch_ctrl.dst_pkt_num = pkt_num - 1;
+      ch_ctrl.src_pkt_num = pkt_num - 1;
+      case(rw_sel)
+        0 : begin // CH0 Read, CH1 Write
+          apb_write(EFCC_CH0_CTRL_REG_ADDR, ch_ctrl);
+          apb_write(EFCC_CH0_SADDR_REG_ADDR, src_addr); // PUSH
+          apb_write(EFCC_CH1_CTRL_REG_ADDR, ch_ctrl);
+          apb_write(EFCC_CH1_DADDR_REG_ADDR, dst_addr); // POP
+        end
+        1 : begin // CH0 Write, CH1 Read
+          apb_write(EFCC_CH0_CTRL_REG_ADDR, ch_ctrl);
+          apb_write(EFCC_CH0_DADDR_REG_ADDR, dst_addr); // POP
+          apb_write(EFCC_CH1_CTRL_REG_ADDR, ch_ctrl);
+          apb_write(EFCC_CH1_SADDR_REG_ADDR, src_addr); // PUSH
+        end
+      endcase
+
+      // Get Top Control Reg Value
+      apb_read(EFCC_TOP_CONTROL_REG_ADDR, top_control);
+      // Trigger DMA channel data transfer
+      top_control.dma_rw_sel = rw_sel;
+      top_control.intr_en = 1;
+      top_control.ch0_en_we = 1;
+      top_control.ch1_en_we = 1;
+      apb_write(EFCC_TOP_CONTROL_REG_ADDR, top_control);
+    endtask
+
     function bit compare_packet_array(efcc_tr_arr arr1, efcc_tr_arr arr2);
       cmp_count++; //compare size
       if(arr1.size() != arr2.size()) begin

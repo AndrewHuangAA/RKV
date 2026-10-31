@@ -32,7 +32,7 @@
 package lvc_apb_pkg;
   
   `include "lvc_apb_transfer.sv"
-  `include "lvc_apb_master_initiator.sv.sv"
+  `include "lvc_apb_master_initiator.sv"
 
 endpackage
 

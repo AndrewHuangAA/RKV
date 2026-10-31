@@ -36,5 +36,7 @@
 `include "rkv_efcc_csr_ctrl_reg_full_test.sv"
 `include "rkv_efcc_pio_directed_test.sv"
 `include "rkv_efcc_dma_directed_test.sv"
+`include "rkv_efcc_work_mode_switch_test.sv"
+`include "rkv_efcc_dma_dual_channel_work_test.sv"
 
 `endif // RKV_EFCC_TESTS_SVH

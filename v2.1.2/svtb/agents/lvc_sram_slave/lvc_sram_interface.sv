@@ -1,5 +1,4 @@
 interface lvc_sram_interface(input logic clka, input logic clkb);
-
   logic [31:0] doa;
   logic [31:0] dob;
   logic [31:0] dia;
@@ -10,5 +9,4 @@ interface lvc_sram_interface(input logic clka, input logic clkb);
   logic        enb;
   logic        wea;
   logic        web;
-
 endinterface

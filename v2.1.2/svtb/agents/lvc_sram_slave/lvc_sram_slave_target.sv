@@ -34,7 +34,7 @@ class lvc_apb_slave_target;
             logic [31:0] rdata_a;
             rdata_a = mem.read(vif.addra);
             vif.doa <= rdata_a;
-            $display("PORT_A READ: addr=0x%08h -> data=0x%08h", vif.addra, rdata_a)
+            $display("PORT_A READ: addr=0x%08h -> data=0x%08h", vif.addra, rdata_a);
           end
         end
       end

@@ -87,39 +87,51 @@ module rkv_efcc_tb;
     $value$plusargs("TESTNAME=%s", testname);
     // Select a Testcase
     case(testname)
-      "rkv_efcc_csr_ctrl_reg_test"        : begin 
-                                            rkv_efcc_csr_ctrl_reg_test        test = new();
-                                            base_test = test; 
-                                            end
+      "rkv_efcc_csr_ctrl_reg_test"            : begin 
+                                              rkv_efcc_csr_ctrl_reg_test          test = new();
+                                              base_test = test; 
+                                              end
 
-      "rkv_efcc_csr_stat_reg_test"        : begin 
-                                            rkv_efcc_csr_stat_reg_test        test = new();
-                                            base_test = test;
-                                            end
+      "rkv_efcc_csr_stat_reg_test"            : begin 
+                                              rkv_efcc_csr_stat_reg_test          test = new();
+                                              base_test = test;
+                                              end
 
-      "rkv_efcc_csr_top_control_reg_test" : begin 
-                                            rkv_efcc_csr_top_control_reg_test test = new();
-                                            base_test = test;
-                                            end
+      "rkv_efcc_csr_top_control_reg_test"     : begin 
+                                              rkv_efcc_csr_top_control_reg_test   test = new();
+                                              base_test = test;
+                                              end
 
-      "rkv_efcc_csr_fifo_in_reg_test"     : begin 
-                                            rkv_efcc_csr_fifo_in_reg_test     test = new();
-                                            base_test = test;
-                                            end
+      "rkv_efcc_csr_fifo_in_reg_test"         : begin 
+                                              rkv_efcc_csr_fifo_in_reg_test       test = new();
+                                              base_test = test;
+                                              end
 
-      "rkv_efcc_csr_ctrl_reg_full_test"   : begin 
-                                            rkv_efcc_csr_ctrl_reg_full_test   test = new();
-                                            base_test = test;
-                                            end
+      "rkv_efcc_csr_ctrl_reg_full_test"       : begin 
+                                              rkv_efcc_csr_ctrl_reg_full_test     test = new();
+                                              base_test = test;
+                                              end
 
-      "rkv_efcc_pio_directed_test"        : begin 
-                                            rkv_efcc_pio_directed_test        test = new();
-                                            base_test = test;
-                                            end
-      "rkv_efcc_dma_directed_test"        : begin 
-                                            rkv_efcc_dma_directed_test        test = new();
-                                            base_test = test;
-                                            end
+      "rkv_efcc_pio_directed_test"            : begin 
+                                              rkv_efcc_pio_directed_test          test = new();
+                                              base_test = test;
+                                              end
+                                              
+      "rkv_efcc_dma_directed_test"            : begin 
+                                              rkv_efcc_dma_directed_test          test = new();
+                                              base_test = test;
+                                              end
+
+      "rkv_efcc_work_mode_switch_test"        : begin 
+                                              rkv_efcc_work_mode_switch_test      test = new();
+                                              base_test = test;
+                                              end
+
+      "rkv_efcc_dma_dual_channel_work_test"   : begin 
+                                              rkv_efcc_dma_dual_channel_work_test test = new();
+                                              base_test = test;
+                                              end
+
       default: $fatal("Test Name [%s] Unrecognized!", testname);
     endcase
     base_test.build();
