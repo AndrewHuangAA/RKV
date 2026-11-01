@@ -163,8 +163,11 @@ class rkv_efcc_base_test;
     endtask
 
     virtual task pio_read_packet(input rkv_efcc_transaction t);
-        apb_read(EFCC_RB_L1DES_REG_ADDR, t.l1des);
-        t.generate_payload(); // 先把pl清0，讓後面foreach的data_array能裝讀出來的pl
+        l1des_t l1des;
+        apb_read(EFCC_RB_L1DES_REG_ADDR, l1des);
+        // t.generate_payload(); // 先把pl清0，讓後面foreach的data_array能裝讀出來的pl
+        if(!t.randomize() with{this.l1des == local::l1des;})
+          $error("rkv_efcc_transaction object randomize failure!");
         foreach(t.data_array[i]) begin
           case(i)
             t.data_array().size-1 : apb_read(EFCC_RB_TAIL_REG_ADDR , t.data_array[i]);
@@ -371,22 +374,17 @@ class rkv_efcc_base_test;
       return t;
     endfunction
 
-    virtual function efcc_tr_arr prepare_packet_array(int unsigned size = 0);
+    virtual function efcc_tr_arr prepare_packet_array(int unsigned size = 0, int unsigned addr = 0);
       int array_size = (size == 0) ? $urandom_range(1, 8) : size ;
       efcc_tr_arr tr_arr[] = new[array_size];  // new a object array
       foreach (tr_arr[i]) begin
         tr_arr[i] = new();                     // new a object in object array
         // tr_arr[i].generate_payload(1);
         if(!tr_arr[i].randomize() with{
-          i == 0 -> this.addr == local::src_addr;
-          i != 0 -> this.addr == tr_arr[i-1].addr + tr_arr[i-1].get_size();
+          (i == 0 && local:: addr != 0) -> this.addr == local::addr;
+          i != 0 -> this.addr == tr_arr[i-1].addr + tr_arr[i-1].data_array.size() * 4;
         })
         $error("rkv_efcc_transaction object randomize failure!");
-        // if(i==0)
-        //   tr_arr[i].addr = src_addr;
-        // else
-        //   // data_array.size()是總共有幾筆資料，一筆資料是4byte(32 bits)，所以下個位置是幾筆資料*4個位置後
-        //   tr_arr[i].addr = tr_arr[i-1].addr + tr_arr[i-1].get_size();
       end
       return tr_arr;
     endfunction

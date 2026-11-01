@@ -52,15 +52,6 @@ class rkv_efcc_pio_directed_test extends rkv_efcc_base_test;
     end
   endtask
 
-  // 拿到 base_test
-  // function rkv_efcc_transaction prepare_packet();
-  //   rkv_efcc_transaction t = new();
-  //   if(!t.randomize())
-  //     $error("rkv_efcc_transaction object randomize failure!");
-  //   // t.generate_payload(1); // Random Payload Generated
-  //   return t;
-  // endfunction
-
 endclass
 
 `endif // RKV_EFCC_PIO_DIRECTED_TEST_SV

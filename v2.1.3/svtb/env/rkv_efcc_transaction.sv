@@ -50,6 +50,17 @@ class rkv_efcc_transaction;
       tail.rsvd == 0;
 
       l1des.layer2 dist {0:50, 1:50};
+
+      /*
+      // 這個跟post_ransomize()一樣功能
+      if(!l1des.layer2) {
+        l2des.fid       = 0;
+        l2des.did       = 0;
+        l2des.sid       = 0;
+        l2des.pkt_typed = 0;
+      }
+      */
+
       l1des.layer2 == 1 -> l1des.length inside {[0:13]};
       l1des.layer2 == 0 -> l1des.length inside {[0:14]};
 
@@ -65,6 +76,16 @@ class rkv_efcc_transaction;
       addr < 'hFFFF_0000; // 不越界
 
     }
+
+    // 隨機後發現有東西還要加條件
+    function void post_randomize();
+      if(!l1des.layer2) begin
+        l2des.fid       = 0;
+        l2des.did       = 0;
+        l2des.sid       = 0;
+        l2des.pkt_typed = 0;
+      end
+    endfunction
 
     function new();
     //     // L1DES default/random value
@@ -94,7 +115,8 @@ class rkv_efcc_transaction;
         // if(trans_kind != t.trans_kind) return 0;
         // if(trans_mode != t.trans_mode) return 0;
         if(l1des != t.l1des)           return 0;
-        if(l2des != t.l2des)           return 0;
+        // if(l2des != t.l2des)           return 0;
+        if(l1des.layer2 && t.l1des.layer2 && l2des != t.l2des) return 0;
         if(tail != t.tail)             return 0;
         if(data_array != t.data_array) return 0;
         return 1;

@@ -27,7 +27,7 @@ class rkv_efcc_dma_dual_channel_work_test extends rkv_efcc_base_test;
 
       // Prepare efcc transaction array
       pkt_num = $urandom_range(1, 8);
-      wr_tr_arr = prepare_packet_array(pkt_num);
+      wr_tr_arr = prepare_packet_array(pkt_num, src_addr);
 
       // Store the packet array into SRAM via backdoor
       bd_write_pkt_array(wr_tr_arr);
@@ -46,26 +46,6 @@ class rkv_efcc_dma_dual_channel_work_test extends rkv_efcc_base_test;
         $display("Compared Success! SRAM Write Transaction Array ==  Read Transaction Array");
     end
   endtask
-
-  // 拿到 base_test
-  // function efcc_tr_arr prepare_packet_array(int unsigned size = 0);
-  //   int array_size = size == 0 ? $urandom_range(1, 8) : size;
-  //   efcc_tr_arr tr_arr = new[array_size];
-  //   foreach(tr_arr[i]) begin
-  //     tr_arr[i] = new();
-  //     // tr_arr[i].generate_payload(1);
-  //     // if(i == 0)
-  //     //   tr_arr[i].addr = src_addr;
-  //     // else
-  //     //   tr_arr[i].addr = tr_arr[i-1].addr + tr_arr[i-1].get_size();
-  //     if(!tr_arr[i].randomize() with{
-  //       i == 0 -> this.addr == local::src_addr;
-  //       i != 0 -> this.addr == tr_arr[i-1].addr + tr_arr[i-1].get_size();
-  //     })
-  //     $error("rkv_efcc_transaction object randomize failure!");
-  //   end
-  //   return tr_arr;
-  // endfunction
 
 endclass
 
