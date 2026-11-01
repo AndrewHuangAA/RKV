@@ -23,16 +23,16 @@ class lvc_apb_master_monitor;
     @(posedge clk_i iff (vif.psel === 1 && vif.penable === 0))
     mon_tr = new();
     mon_tr.addr = vif.paddr;
-    mon_tr.trans_kind = vif.pwrite ? WRITE : READ;
+    mon_tr.trans_kind = vif.pwrite ? lvc_apb_transfer::WRITE : lvc_apb_transfer::READ;
     #10ps;
     wait(vif.praedy === 1);
     #10ps;
-    mon_tr.trans_status = vif.pslverr === 1 ? ERROR : OK;
-    if(mon_tr.trans_kind == READ)
+    mon_tr.trans_status = vif.pslverr === 1 ? lvc_apb_transfer::ERROR : lvc_apb_transfer::OK;
+    if(mon_tr.trans_kind == lvc_apb_transfer::READ)
       mon_tr.data = vif.prdata;
   endtask
 
-  function write_transfer();
+  function viud write_transfer();
     // TODO
     // Send Monitored Transfers to Other Components
     mon_tr.print();

@@ -82,9 +82,9 @@ class lvc_apb_master_initiator;
   // 不用加automatic，class裡面默認是動態的
   task drive_transfer (input lvc_apb_transfer t);
     case(t.trans_kind)
-      IDLE  : do_idle();
-      WRITE : do_write(t);
-      READ  : do_read(t);
+      lvc_apb_transfer::IDLE  : do_idle();
+      lvc_apb_transfer::WRITE : do_write(t);
+      lvc_apb_transfer::READ  : do_read(t);
     endcase
     t.print();
   endtask : drive_transfer
@@ -108,7 +108,7 @@ class lvc_apb_master_initiator;
       #10ps;
       wait(vif.pready === 1);
       #10ps;
-      t.trans_status = vif.pslverr === 1 ? ERROR : OK;
+      t.trans_status = vif.pslverr === 1 ? lvc_apb_transfer::ERROR : lvc_apb_transfer::OK;
       repeat(t.idle_cycles) do_idle();
   endtask
 
@@ -123,7 +123,7 @@ class lvc_apb_master_initiator;
       #10ps;
       wait(vif.pready === 1);
       #10ps;
-      t.trans_status = vif.pslverr === 1 ? ERROR : OK;
+      t.trans_status = vif.pslverr === 1 ? lvc_apb_transfer::ERROR : lvc_apb_transfer::OK;
       t.data = vif.prdata;
       repeat(t.idle_cycles) do_idle();
   endtask

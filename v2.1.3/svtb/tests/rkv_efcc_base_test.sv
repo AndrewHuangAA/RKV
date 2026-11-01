@@ -46,8 +46,8 @@ class rkv_efcc_base_test;
         this.apb_vif = apb_vif;
         this.sram_vif = sram_vif;
         env.apb_mst.assign_if(apb_vif);
-        env.sram_trgt.assign_if(sram_vif);
-        mem = env.sram_trgt.mem; 
+        env.sram_slv.assign_if(sram_vif);
+        mem = env.sram_slv.trgt.mem; 
     endfunction
 
     virtual task post_run();
@@ -81,20 +81,20 @@ class rkv_efcc_base_test;
         lvc_apb_transfer t = new();
         t.addr = addr;
         t.data = data;
-        t.trans_kind = WRITE;
+        t.trans_kind = lvc_apb_transfer::WRITE;
         t.idle_cycle = idle_cycle;
         apb_drive_transfer(t);
-        if(t.trans_status == ERROR) $error("APB Bus Got an Error Response!");
+        if(t.trans_status == lvc_apb_transfer::ERROR) $error("APB Bus Got an Error Response!");
     endtask
 
     virtual task apb_read(input bit[31:0] addr, output bit[31:0] data, int unsigned idle_cycle = 1);
         lvc_apb_transfer t = new();
         t.addr = addr;
-        t.trans_kind = READ;
+        t.trans_kind = lvc_apb_transfer::READ;
         t.idle_cycle = idle_cycle;
         apb_drive_transfer(t);
         data = t.data;
-        if(t.trans_status == ERROR) $error("APB Bus Got an Error Response!");
+        if(t.trans_status == lvc_apb_transfer::ERROR) $error("APB Bus Got an Error Response!");
     endtask
 
     virtual function bit compare_data(int unsigned d1, int unsigned d2, string tag = "CMPDAT");

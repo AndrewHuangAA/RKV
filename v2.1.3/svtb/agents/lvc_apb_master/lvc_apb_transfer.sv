@@ -28,10 +28,12 @@
 `ifndef LVC_APB_TRANSFER_SV
 `define LVC_APB_TRANSFER_SV
 
-typedef enum {IDLE, WRITE, READ} apb_trans_kind;
-typedef enum {OK, ERROR} apb_trans_status;
+// typedef enum {IDLE, WRITE, READ} apb_trans_kind;
+// typedef enum {OK, ERROR} apb_trans_status;
 
 class lvc_apb_transfer;
+  typedef enum {IDLE, WRITE, READ} apb_trans_kind;
+  typedef enum {OK, ERROR} apb_trans_status;
   bit [31:0]        addr;
   bit [31:0]        data;
   apb_trans_kind    trans_kind;
