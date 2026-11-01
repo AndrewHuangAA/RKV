@@ -45,7 +45,7 @@ class rkv_efcc_base_test;
                                   input virtual lvc_ssram_interface sram_vif);
         this.apb_vif = apb_vif;
         this.sram_vif = sram_vif;
-        env.apb_init.assign_if(apb_vif);
+        env.apb_mst.assign_if(apb_vif);
         env.sram_trgt.assign_if(sram_vif);
         mem = env.sram_trgt.mem; 
     endfunction
@@ -58,13 +58,23 @@ class rkv_efcc_base_test;
         fork
           env.run();
         join_none
-        env.apb_init.do_reset();
+        // env.apb_init.do_reset();
+        // @(negedge apb_vif.rstn_i);
+        // @(posedge apb_vif.rstn_i);
+        // repeat(5) @(posedge apb_vif.clk_i);
+        wait_reset_assert_and_release();
+    endtask 
+
+    task wait_reset_assert_and_release();
+        @(negedge apb_vif.rstn_i);
         @(posedge apb_vif.rstn_i);
         repeat(5) @(posedge apb_vif.clk_i);
     endtask
 
-    virtual task apb_drive_transfer(input lvc_apb_transfer t);
-        env.apn_init.drive_transfer(t);
+    virtual task apb_drive_transfer(inout lvc_apb_transfer t);
+        // env.apb_init.drive_transfer(t);
+        env.apb_mst.do_item(t);
+        env.apb_mst.get_response(t);
     endtask
 
     virtual task apb_write(input bit[31:0] addr, input bit[31:0] data, int unsigned idle_cycle = 1);
@@ -166,7 +176,7 @@ class rkv_efcc_base_test;
         l1des_t l1des;
         apb_read(EFCC_RB_L1DES_REG_ADDR, l1des);
         // t.generate_payload(); // 先把pl清0，讓後面foreach的data_array能裝讀出來的pl
-        if(!t.randomize() with{this.l1des == local::l1des;})
+        if(!t.randomize() with {this.l1des == local::l1des;})
           $error("rkv_efcc_transaction object randomize failure!");
         foreach(t.data_array[i]) begin
           case(i)

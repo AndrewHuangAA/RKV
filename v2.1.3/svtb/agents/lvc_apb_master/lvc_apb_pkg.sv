@@ -33,6 +33,8 @@ package lvc_apb_pkg;
   
   `include "lvc_apb_transfer.sv"
   `include "lvc_apb_master_initiator.sv"
+  `include "lvc_apb_master_monitor.sv"
+  `include "lvc_apb_master_agent.sv"
 
 endpackage
 

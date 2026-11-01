@@ -42,15 +42,26 @@ class rkv_efcc_transaction;
 
     constraint packet_cstr{
       l1des.head == 8'hD1;
-      l2des.head == 8'hD2;
-      tail.pkt_end == 8'hED;
-
       l1des.rsvd == 0;
+      l1des.layer2 dist {0:50, 1:50};
+      l1des.layer2 == 1 -> l1des.length inside {[0:13]};
+      l1des.layer2 == 0 -> l1des.length inside {[0:14]};
+      l1des.layer2 == 1 -> data_array.size() == l1des.length + 3;
+      l1des.layer2 == 0 -> data_array.size() == l1des.length + 2;
+      l1des.layer2 == 1 -> data_array[1] == l2des;
+      l1des.crc == 0 -> tail.crc == 8'h00;
+
+      l2des.head == 8'hD2;
       l2des.rsvd == 0;
+
+      tail.pkt_end == 8'hED;
       tail.rsvd == 0;
 
-      l1des.layer2 dist {0:50, 1:50};
+      data_array[0] == l1des;
+      data_array[data_array.size()-1] == tail;
 
+      addr[1:0] == 0;
+      addr < 'hFFFF_0000; // 不越界
       /*
       // 這個跟post_ransomize()一樣功能
       if(!l1des.layer2) {
@@ -60,21 +71,6 @@ class rkv_efcc_transaction;
         l2des.pkt_typed = 0;
       }
       */
-
-      l1des.layer2 == 1 -> l1des.length inside {[0:13]};
-      l1des.layer2 == 0 -> l1des.length inside {[0:14]};
-
-      data_array[0] == l1des;
-      data_array[data_array.size()-1] == tail;
-      l1des.layer2 == 1 -> data_array[1] == l2des;
-
-      l1des.layer2 == 1 -> data_array.size() == l1des.length + 3;
-      l1des.layer2 == 0 -> data_array.size() == l1des.length + 2;
-      l1des.crc == 0 -> tail.crc == 8'h00;
-
-      addr[1:0] == 0;
-      addr < 'hFFFF_0000; // 不越界
-
     }
 
     // 隨機後發現有東西還要加條件

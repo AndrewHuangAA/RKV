@@ -30,20 +30,24 @@
 
 class rkv_efcc_env;
 
-    lvc_apb_master_initiator apb_init;
+    // lvc_apb_master_initiator apb_init;
+    lvc_apb_master_agent apb_mst;
     lvc_sram_slave_target sram_trgt;
     
     function new();
     endfunction
 
     function void build();
-        apb_init = new();
+        // apb_init = new();
+        apb_mst = new();
         sram_trgt = new();
+        apb_mst.build();
     endfunction
 
     task run();
         fork
-            apb_init.run();
+            // apb_init.run();
+            apb_mst.run();
             sram_trgt.run();
         join_none
     endtask

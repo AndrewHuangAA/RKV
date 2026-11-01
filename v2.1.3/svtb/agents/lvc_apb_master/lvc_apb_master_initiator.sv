@@ -30,17 +30,54 @@
 
 class lvc_apb_master_initiator;
 
+  protected mailbox #(lvc_apb_transfer) req_mb;
+  protected mailbox #(lvc_apb_transfer) rsp_mb;
+
   virtual lvc_apb_interface vif;
   
   function new();
+    req_mb = new(1);
+    rsp_mb = new(1);
   endfunction
 
   task run();
+    fork
+      get_and_drive();
+      reset_listener();
+    join_none
   endtask
 
-  function void assign_if(input virtual lvc_apb_interface vif); //默認是input
-    this.vif = vif;
-  endfunction
+  // function void assign_if(input virtual lvc_apb_interface vif); //默認是input
+  //   this.vif = vif;
+  // endfunction 
+
+  task do_item(input lvc_apb_transfer t);
+    req_mb.put(t);
+  endtask
+
+  task get_next_item(output lvc_apb_transfer t);
+    req_mb.get(t);
+  endtask
+
+  task item_done(input lvc_apb_transfer t);
+    rsp_mb.put(t)
+  endtask
+
+  task get_response(output lvc_apb_transfer t);
+    rsp_mb.get(t)
+  endtask
+  
+  task get_and_drive();
+    forever begin
+      // Get a transfer
+      get_next_item(req);
+      // Drive a transfer
+      drive_transfer(req);
+      // Put a response
+      rsp = new req;
+      item_done(rsp);
+    end
+  endtask
 
   // 不用加automatic，class裡面默認是動態的
   task drive_transfer (input lvc_apb_transfer t);
@@ -100,6 +137,11 @@ class lvc_apb_master_initiator;
       vif.pwdata  <= 0;
   endtask
 
+  task reset_listener();
+    fork
+      forever do_reset();
+    join_none
+  endtask
 
 endclass
 
