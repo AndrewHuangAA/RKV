@@ -33,6 +33,7 @@ class rkv_efcc_env;
     // lvc_apb_master_initiator apb_init;
     lvc_apb_master_agent apb_mst;
     lvc_sram_slave_agent sram_slv;
+    rkv_efcc_scoreboard scb;
     
     function new();
     endfunction
@@ -41,8 +42,16 @@ class rkv_efcc_env;
         // apb_init = new();
         apb_mst = new();
         sram_slv = new();
+        scb = new();
         apb_mst.build();
         sram_slv.build();
+        scb.build();
+    endfunction
+    
+    function void connect();
+        apb_mst.mon.mon_mb.push_back(scb.apb_mb);
+        sram_slv.mon.mon_porta_mb.push_back(scb.sram_porta_mb);
+        sram_slv.mon.mon_portb_mb.push_back(scb.sram_portb_mb);
     endfunction
 
     task run();
@@ -50,6 +59,7 @@ class rkv_efcc_env;
             // apb_init.run();
             apb_mst.run();
             sram_slv.run();
+            scb.run();
         join_none
     endtask
 endclass

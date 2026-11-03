@@ -6,6 +6,8 @@ class lvc_apb_master_monitor;
   virtual lvc_apb_interface vif;
   lvc_apb_transfer mon_tr;
 
+  mailbox #(lvc_apb_transfer) mon_mb[$];
+
   task run();
     fork
       monitor_transactions();
@@ -25,18 +27,21 @@ class lvc_apb_master_monitor;
     mon_tr.addr = vif.paddr;
     mon_tr.trans_kind = vif.pwrite ? lvc_apb_transfer::WRITE : lvc_apb_transfer::READ;
     #10ps;
-    wait(vif.praedy === 1);
+    wait(vif.pready === 1);
     #10ps;
     mon_tr.trans_status = vif.pslverr === 1 ? lvc_apb_transfer::ERROR : lvc_apb_transfer::OK;
     if(mon_tr.trans_kind == lvc_apb_transfer::READ)
       mon_tr.data = vif.prdata;
   endtask
 
-  function viud write_transfer();
+  task write_transfer();
     // TODO
     // Send Monitored Transfers to Other Components
-    mon_tr.print();
-  endfunction
+    foreach(mon_mb[i]) begin
+      mon_mb[i].put(mon_tr);
+      mon_tr.print();
+    end
+  endtask
 
 endclass
 

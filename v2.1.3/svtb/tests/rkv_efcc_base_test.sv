@@ -48,6 +48,7 @@ class rkv_efcc_base_test;
         env.apb_mst.assign_if(apb_vif);
         env.sram_slv.assign_if(sram_vif);
         mem = env.sram_slv.trgt.mem; 
+        env.connect();
     endfunction
 
     virtual task post_run();

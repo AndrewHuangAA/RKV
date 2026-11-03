@@ -5,6 +5,9 @@ class lvc_sram_slave_monitor;
 
     virtual lvc_sram_interface vif;
 
+    mailbox #(lvc_sram_transfer) min_porta_mb[$];
+    mailbox #(lvc_sram_transfer) min_portb_mb[$];
+
     task run();
         fork
             monitor_transactions();
@@ -28,7 +31,7 @@ class lvc_sram_slave_monitor;
                     tr.cmd = lvc_sram_transfer::WRITE;
                     tr.addr = vif.addra;
                     tr.data = vif.dia;
-                    write_transfer(tr);
+                    write_porta_transfer(tr);
                 end
                 else begin
                     fork
@@ -40,7 +43,7 @@ class lvc_sram_slave_monitor;
                             r_tr.cmd = lvc_sram_transfer::READ;
                             r_tr.addr = captured_addr;
                             r_tr.data = vif.doa;
-                            write_transfer(r_tr);
+                            write_porta_transfer(r_tr);
                         end
                     join_none
                 end
@@ -58,7 +61,7 @@ class lvc_sram_slave_monitor;
                     tr.cmd = lvc_sram_transfer::WRITE;
                     tr.addr = vif.addrb;
                     tr.data = vif.dib;
-                    write_transfer(tr);
+                    write_portb_transfer(tr);
                 end
                 else begin
                     fork
@@ -70,7 +73,7 @@ class lvc_sram_slave_monitor;
                             r_tr.cmd = lvc_sram_transfer::READ;
                             r_tr.addr = captured_addr;
                             r_tr.data = vif.dob;
-                            write_transfer(r_tr);
+                            write_portb_transfer(r_tr);
                         end
                     join_none
                 end
@@ -78,11 +81,21 @@ class lvc_sram_slave_monitor;
         end
     endtask
 
-    function void write_transfer(input lvc_sram_transfer t);
+    task write_porta_transfer(input lvc_sram_transfer t);
     // TODO
     // Send Monitored Transfers to Other Components
-  endfunction
+        foreach(mon_porta_mb[i]) begin
+            mon_porta_mb[i].put(t);
+        end
+    endtask
 
+    task write_portb_transfer(input lvc_sram_transfer t);
+    // TODO
+    // Send Monitored Transfers to Other Components
+        foreach(mon_portb_mb[i]) begin
+            mon_portb_mb[i].put(t);
+        end
+    endtask
 
 endclass
 
