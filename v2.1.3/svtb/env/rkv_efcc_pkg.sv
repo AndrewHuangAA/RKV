@@ -35,6 +35,7 @@ package rkv_efcc_pkg;
 
     // `include "rkv_efcc_tests.svh"
     `include "rkv_efcc_defines.svh"
+    `include "rkv_efcc_config.sv"
     `include "rkv_efcc_reg_defines.svh"
     `include "rkv_efcc_transaction.sv"
     `include "rkv_efcc_subscriber.sv"

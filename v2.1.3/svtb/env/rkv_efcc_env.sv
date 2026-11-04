@@ -34,6 +34,7 @@ class rkv_efcc_env;
     lvc_apb_master_agent apb_mst;
     lvc_sram_slave_agent sram_slv;
     rkv_efcc_scoreboard scb;
+    rkv_efcc_config cfg;
     
     function new();
     endfunction
@@ -49,6 +50,7 @@ class rkv_efcc_env;
     endfunction
     
     function void connect();
+        scb.cfg = cfg;
         apb_mst.mon.mon_mb.push_back(scb.apb_mb);
         sram_slv.mon.mon_porta_mb.push_back(scb.sram_porta_mb);
         sram_slv.mon.mon_portb_mb.push_back(scb.sram_portb_mb);

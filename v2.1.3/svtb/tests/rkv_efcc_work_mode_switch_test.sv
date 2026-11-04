@@ -56,14 +56,14 @@ class rkv_efcc_work_mode_switch_test extends rkv_efcc_base_test;
     //*****************************************************
     // Compare TX packet and RX packet
     if(!tx.compare(rx)) begin
-      err_count++;
+      cfg.seq_check_error++;
       $error("TX packet compared RX packet FAILURE!");
       tx.print();
       rx.print();
     end
     else
       $display("TX packet compared RX packet SUCCESS!");
-    cmp_count++;
+    cfg.seq_check_count++;
   endtask
 
   task dma_mode_test();

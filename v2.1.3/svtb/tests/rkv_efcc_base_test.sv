@@ -31,13 +31,15 @@
 class rkv_efcc_base_test;
 
     rkv_efcc_env env;
+    rkv_efcc_config cfg;
     lvc_mem mem;
-    int unsigned cmp_count, err_count;
+    // int unsigned cmp_count, err_count;
     virtual lvc_apb_interface apb_vif;
     virtual lvc_sram_interface sram_vif;
 
     virtual function void build();
         env = new();
+        cfg = new();
         env.build(); //會去例化apb_init
     endfunction
     
@@ -48,6 +50,7 @@ class rkv_efcc_base_test;
         env.apb_mst.assign_if(apb_vif);
         env.sram_slv.assign_if(sram_vif);
         mem = env.sram_slv.trgt.mem; 
+        env.cfg = cfg;
         env.connect();
     endfunction
 
@@ -100,10 +103,10 @@ class rkv_efcc_base_test;
 
     virtual function bit compare_data(int unsigned d1, int unsigned d2, string tag = "CMPDAT");
         compare_data = (d1 === d2);
-        cmp_count++;
+        cfg.seq_check_count++;
         if(!compare_data) begin
             $error("%s: compare failure! data1 'h%0x != data2 'h%0x", tag, d1, d2);
-            err_count++;
+            cfg.seq_check_error++;
             $stop();
         end else
             $display("%s: compare success! data1 'h%0x == data2 'h%0x", tag, d1, d2);
@@ -111,9 +114,11 @@ class rkv_efcc_base_test;
 
     virtual function void report();
         string msg = "************ Test Report ************ \n";
-        msg = {msg, $sformatf("Compre Count = %0d \n", cmp_count)};
-        msg = {msg, $sformatf("Error Count = %0d \n", err_count)};
-        if(err_count != 0)
+        msg = {msg, $sformatf("Sequence Compre Count = %0d \n", cfg.seq_check_count)};
+        msg = {msg, $sformatf("Sequence Error Count = %0d \n", cfg.seq_check_error)};
+        msg = {msg, $sformatf("Scoreboard Compre Count = %0d \n", cfg.scb_check_count)};
+        msg = {msg, $sformatf("Scoreboard Error Count = %0d \n", cfg.scb_check_error)};
+        if(cfg.seq_check_error != 0 || cfg.scb_check_error != 0)
             msg = {msg, "Test Failed \n"};
         else
             msg = {msg, "Test Passed \n"};
@@ -354,17 +359,17 @@ class rkv_efcc_base_test;
     endtask
 
     function bit compare_packet_array(efcc_tr_arr arr1, efcc_tr_arr arr2);
-      cmp_count++; //compare size
+      cfg.seq_check_count++; //compare size
       if(arr1.size() != arr2.size()) begin
-        err_count++;
+        cfg.seq_check_error++;
         $error("Compared Packet Array Size Mismatch, Array1 Size [%0d], Array2 Size [%0d]", arr1.size(), arr2.size());
         return 0;
       end
       else begin
         foreach(arr1[i]) begin
-          cmp_count++;
+          cfg.seq_check_count++;
           if(!arr1[i].compare(arr2[i])) begin
-            err_count++;
+            cfg.seq_check_error++;
             $error("TX packet compared RX packet FAILURE!");
             arr1[i].print();
             arr2[i].print();

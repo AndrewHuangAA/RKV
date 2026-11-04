@@ -30,8 +30,7 @@ class lvc_apb_master_monitor;
     wait(vif.pready === 1);
     #10ps;
     mon_tr.trans_status = vif.pslverr === 1 ? lvc_apb_transfer::ERROR : lvc_apb_transfer::OK;
-    if(mon_tr.trans_kind == lvc_apb_transfer::READ)
-      mon_tr.data = vif.prdata;
+    mon_tr.data = (mon_tr.trans_kind == lvc_apb_transfer::WRITE) ? vif.pwdata : vif.prdata;
   endtask
 
   task write_transfer();
