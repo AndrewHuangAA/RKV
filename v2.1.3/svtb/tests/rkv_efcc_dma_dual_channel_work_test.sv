@@ -20,6 +20,9 @@ class rkv_efcc_dma_dual_channel_work_test extends rkv_efcc_base_test;
     set_work_mode(DMA);
 
     repeat(10) begin
+      // Reset Memory
+      mem.reset();
+
       dual_chnl_mode = $urandom_range(0, 1);
 
       src_addr[27:24] = $urandom();

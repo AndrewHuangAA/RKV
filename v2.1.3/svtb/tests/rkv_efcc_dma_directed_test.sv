@@ -20,6 +20,9 @@ class rkv_efcc_dma_directed_test extends rkv_efcc_base_test;
     set_work_mode(DMA);
 
     repeat(10) begin
+      // Reset Memory
+      mem.reset();
+
       // Prepare efcc transaction array
       pkt_num = $urandom_range(1, 8);
       wr_tr_arr = prepare_packet_array(pkt_num, src_addr);

@@ -43,7 +43,7 @@ class lvc_apb_transfer;
 
   // function_description
   function void new();
-  endfunction : new
+  endfunction
 
   function void print();
     string msg = "********APB Transfer Content is *********\n";
@@ -54,7 +54,7 @@ class lvc_apb_transfer;
     msg = {msg, $sformatf("idle_cycles = %0d \n", idle_cycles)};
     msg = {msg, "*****************************************\n"};
     $display(msg);
-  endfunction : print
+  endfunction
 endclass
 
 `endif // LVC_APB_TRANSFER_SV

@@ -71,6 +71,9 @@ class rkv_efcc_work_mode_switch_test extends rkv_efcc_base_test;
     efcc_tr_arr wr_tr_arr, rd_tr_arr;
     int pkt_num;
 
+    // Reset Memory
+    mem.reset();
+
     // Set DMA Work Mode
     set_work_mode(DMA);
 

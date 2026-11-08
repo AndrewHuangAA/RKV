@@ -46,7 +46,8 @@ class rkv_efcc_subscriber;
         end
     endtask
 
-    // Formatting a EFCC Packet from APB Transfers....注意efcc_tr是inout
+    // Formatting a EFCC Packet from APB Transfers 注意efcc_tr是inout!!
+    // Monitor由信箱接收多個"lvc_apb_transfer apb_tr"然後逐一把他們放入"rkv_efcc_transaction efcc_tr"
     virtual task apb_trans_format_packet(input lvc_apb_transfer apb_tr, inout rkv_efcc_transaction efcc_tr);
         if(apb_tr.trans_kind == lvc_apb_transfer::WRITE && apb_tr.addr inside {[EFCC_TB_L1DES_REG_ADDR:EFCC_TB_TAIL_REG_ADDR]} ||
            apb_tr.trans_kind == lvc_apb_transfer::READ  && apb_tr.addr inside {[EFCC_RB_L1DES_REG_ADDR:EFCC_RB_TAIL_REG_ADDR]}
@@ -73,8 +74,8 @@ class rkv_efcc_subscriber;
                 EFCC_TB_TAIL_REG_ADDR, EFCC_RB_TAIL_REG_ADDR : begin // TB/RB TAIL
                     efcc_tr.tail = apb_tr.data;
                     efcc_tr.data_array[efcc_tr.data_array.size() - 1] = efcc_tr.tail;
-                    if(efcc_tr.l1des.layer2)
-                    efcc_tr.l2des = efcc_tr.data_array[1];
+                    if(efcc_tr.l1des.layer2) // tail出來後代表這包已經完成，再去設定有沒有l2des，這時候data_array[1]一定有東西
+                      efcc_tr.l2des = efcc_tr.data_array[1];
                     efcc_pio_mb.put(efcc_tr);
                 end
                 default : begin // TB/RB Payload
@@ -104,12 +105,12 @@ class rkv_efcc_subscriber;
         if(efcc_tr == null) begin // L1DES
             if(sram_tr.data[31:24] == 'hD1) begin
                 efcc_tr = new();
-                if(!efcc_tr.randomize() with {l1des == sram_tr.data;
+                if(!efcc_tr.randomize() with {  l1des == sram_tr.data;
                                                 sram_tr.cmd == lvc_sram_transfer::READ -> trans_kind == PUSH;
                                                 sram_tr.cmd == lvc_sram_transfer::WRITE -> trans_kind == POP;
                                                 trans_mode == DMA;
                                                 addr == sram_tr.addr;
-                                                })
+                                             })
                     $error("rkv_efcc_transaction object randomize failure!");
             end
         end

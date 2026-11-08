@@ -1,7 +1,7 @@
 `ifndef LVC_SRAM_SLAVE_TARGET_SV
 `define LVC_SRAM_SLAVE_TARGET_SV
 
-class lvc_apb_slave_target;
+class lvc_sram_slave_target;
 
   virtual lvc_sram_interface vif;
   lvc_mem mem;
@@ -21,15 +21,17 @@ class lvc_apb_slave_target;
   endtask
 
   task response_handler();
-    // ------------------------- Port A -------------------------
     fork
+      // ------------------------- Port A -------------------------
       begin
         forever begin
           @(posedge vif.clka);
+          // DUT(Sel)寫給Sram，總線上把data丟到mem
           if (vif.ena && vif.wea) begin
             mem.write(vif.addra, vif.dia);
             $display("PORT_A WRITE: addr=0x%08h, data=0x%08h", vif.addra, vif.dia);
           end
+          // DUT讀取Sram，資料從Sram to DUT，把data傳到總線上vif.doa
           if (vif.ena && !vif.wea) begin
             logic [31:0] rdata_a;
             rdata_a = mem.read(vif.addra);
