@@ -231,7 +231,7 @@ class rkv_efcc_base_test;
         end while(!rb_ctrl.done);
     endtask
 
-    virtual task wait_cycles(input n);
+    virtual task wait_cycles(input int unsigned n);
         repeat(n) @(posedge apb_vif.clk_i);
     endtask
 
