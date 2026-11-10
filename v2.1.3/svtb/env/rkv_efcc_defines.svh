@@ -31,6 +31,13 @@
 // PUSH: external -> EFCC, POP: EFCC -> external (pio、dma)
 typedef enum bit      {PUSH = 0   , POP = 1    } trans_kind_e; 
 typedef enum bit[1:0] {PIO = 2'b00, DMA = 2'b01} trans_mode_e;
+typedef enum {CH0_DONE = 0, 
+              CH1_DONE = 1, 
+              FIFO_IN_OVRN = 2, 
+              FIFO_OUT_OVRN = 3, 
+              CRC_ERR = 4, 
+              FMT_ERR = 5
+             } intr_kind_e; 
 
 // L1DES (Layer 1 Descriptor) - 32 bits
 typedef struct packed {

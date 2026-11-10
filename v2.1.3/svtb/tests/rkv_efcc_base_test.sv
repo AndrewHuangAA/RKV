@@ -154,6 +154,33 @@ class rkv_efcc_base_test;
         apb_write(EFCC_TOP_CONTROL_REG_ADDR, top_control);
     endtask
 
+    virtual task set_intr_en(input intr_kind_e, input bit en = 1);
+      efcc_intr_en_reg_struct intr_en;
+      apb_read(EFCC_INTR_EN_REG_ADDR, intr_en);
+      intr_en[kind] = en;
+      apb_write(EFCC_INTR_EN_REG_ADDR, intr_en);
+    endtask
+    
+    virtual task set_intr_clr(input intr_kind_e);
+      efcc_intr_clr_reg_struct intr_clr;
+      intr_clr[kind] = 1;
+      apb_write(EFCC_INTR_CLR_REG_ADDR, intr_clr);
+    endtask
+
+    virtual task get_intr_stat(input intr_kind_e, output bit stat);
+      efcc_intr_status_reg_struct intr_status;
+      apb_write(EFCC_INTR_STATUS_REG_ADDR, intr_status);
+      stat = intr_status[kind];
+    endtask
+
+    virtual task wait_intr_stat(input intr_kind_e);
+      bit stat;
+      do begin
+        wait_cycles(100);
+        get_intr_stat(kind, stat);
+      end while(!stat);
+    endtask
+
     virtual task pio_write_packet(input rkv_efcc_transaction t);
         foreach(t.data_array[i]) begin
           case(i)

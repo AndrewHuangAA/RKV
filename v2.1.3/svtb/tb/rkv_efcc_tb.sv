@@ -111,6 +111,11 @@ module rkv_efcc_tb;
                                               rkv_efcc_disable_test test = new();
                                               base_test = test;
                                               end
+    
+      "rkv_efcc_dma_interrupt_test"           : begin 
+                                              rkv_efcc_dma_interrupt_test test = new();
+                                              base_test = test;
+                                              end
 
       default: $fatal("Test Name [%s] Unrecognized!", testname);
     endcase
