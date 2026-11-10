@@ -33,5 +33,9 @@
 `include "rkv_efcc_dma_directed_test.sv"
 `include "rkv_efcc_work_mode_switch_test.sv"
 `include "rkv_efcc_dma_dual_channel_work_test.sv"
+`include "rkv_efcc_disable_test.sv"
+`include "rkv_efcc_dma_interrupt_test.sv"
+`include "rkv_efcc_reset_test.sv"
+`include "rkv_efcc_clk_gating_test.sv"
 
 `endif // RKV_EFCC_TESTS_SVH

@@ -107,6 +107,11 @@ module rkv_efcc_tb;
                                               base_test = test;
                                               end
 
+      "rkv_efcc_disable_test"                 : begin 
+                                              rkv_efcc_disable_test test = new();
+                                              base_test = test;
+                                              end
+
       default: $fatal("Test Name [%s] Unrecognized!", testname);
     endcase
     base_test.build();
