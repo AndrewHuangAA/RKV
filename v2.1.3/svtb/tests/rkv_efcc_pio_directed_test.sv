@@ -3,6 +3,11 @@
 
 class rkv_efcc_pio_directed_test extends rkv_efcc_base_test;
 
+  function new();
+    super.new();
+    name = "rkv_efcc_pio_directed_test";
+  endfunction
+  
   task run();
     rkv_efcc_transaction tx = new();
     rkv_efcc_transaction rx = new();

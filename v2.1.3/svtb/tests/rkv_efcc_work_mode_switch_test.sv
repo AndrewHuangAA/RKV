@@ -6,6 +6,8 @@ class rkv_efcc_work_mode_switch_test extends rkv_efcc_base_test;
   int unsigned src_addr, dst_addr; // packets loaded & stored with SRAM
 
   function new();
+    super.new();
+    name = "rkv_efcc_work_mode_switch_test";
     src_addr = 32'h1000;
     dst_addr = 32'h2000;
   endfunction
@@ -88,12 +90,12 @@ class rkv_efcc_work_mode_switch_test extends rkv_efcc_base_test;
     // Channel Read
     ch = $urandom_range(0, 1);
     setup_reg_dma_mode(PUSH, pkt_num, src_addr, ch);
-    #1us;
+    #2us;
 
     // Channel Write
     ch = $urandom_range(0, 1);
     setup_reg_dma_mode(POP, pkt_num, dst_addr, ch);
-    #1us;
+    #2us;
 
     // Back Read Packet Array
     rd_tr_arr = bd_read_pkt_array(dst_addr, pkt_num);

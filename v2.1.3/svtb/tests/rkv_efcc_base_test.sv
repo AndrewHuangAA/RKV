@@ -34,8 +34,16 @@ class rkv_efcc_base_test;
     rkv_efcc_config cfg;
     lvc_mem mem;
     // int unsigned cmp_count, err_count;
+
+    string name;
+
     virtual lvc_apb_interface apb_vif;
     virtual lvc_sram_interface sram_vif;
+    virtual rkv_efcc_if efcc_vif;
+
+    function new();
+      name = "rkv_efcc_base_test";
+    endfunction
 
     virtual function void build();
         env = new();
@@ -43,10 +51,12 @@ class rkv_efcc_base_test;
         env.build(); //會去例化apb_init
     endfunction
     
-    virtual function void connect(input virtual lvc_apb_interface   apb_vif
-                                  input virtual lvc_ssram_interface sram_vif);
+    virtual function void connect(input virtual lvc_apb_interface  apb_vif
+                                  input virtual lvc_sram_interface sram_vif
+                                  input virtual rkv_efcc_if        efcc_vif);
         this.apb_vif = apb_vif;
         this.sram_vif = sram_vif;
+        this.efcc_vif = efcc_vif;
         env.apb_mst.assign_if(apb_vif);
         env.sram_slv.assign_if(sram_vif);
         mem = env.sram_slv.trgt.mem; 
@@ -55,7 +65,7 @@ class rkv_efcc_base_test;
     endfunction
 
     virtual task post_run();
-        #1us;
+        #(cfg.drain_time);
     endtask
 
     virtual task run();
@@ -112,18 +122,23 @@ class rkv_efcc_base_test;
             $display("%s: compare success! data1 'h%0x == data2 'h%0x", tag, d1, d2);
     endfunction
 
+    virtual function void check();
+      env.check();
+    endfunction
+
     virtual function void report();
-        string msg = "************ Test Report ************ \n";
-        msg = {msg, $sformatf("Sequence Compre Count = %0d \n", cfg.seq_check_count)};
-        msg = {msg, $sformatf("Sequence Error Count = %0d \n", cfg.seq_check_error)};
-        msg = {msg, $sformatf("Scoreboard Compre Count = %0d \n", cfg.scb_check_count)};
-        msg = {msg, $sformatf("Scoreboard Error Count = %0d \n", cfg.scb_check_error)};
-        if(cfg.seq_check_error != 0 || cfg.scb_check_error != 0)
-            msg = {msg, "Test Failed \n"};
-        else
-            msg = {msg, "Test Passed \n"};
-        msg = {msg, "************************************* \n"};
-        $display(msg);
+      string msg = "************ Test Report ************ \n";
+      msg = {msg, $sformatf("Test Name = %s \n", name)};
+      msg = {msg, $sformatf("Sequence Compare Count = %0d \n", cfg.seq_check_count)};
+      msg = {msg, $sformatf("Sequence Error Count = %0d \n", cfg.seq_check_error)};
+      msg = {msg, $sformatf("Scoreboard Compare Count = %0d \n", cfg.scb_check_count)};
+      msg = {msg, $sformatf("Scoreboard Error Count = %0d \n", cfg.scb_check_error)};
+      if(cfg.seq_check_error != 0 || cfg.scb_check_error != 0)
+        msg = {msg, "Test Failed \n"};
+      else
+        msg = {msg, "Test Passed \n"};
+      msg = {msg,  "************************************* \n"};
+      $display(msg);
     endfunction
 
     virtual task void set_efcc_enable(input bit en = 1);

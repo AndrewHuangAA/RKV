@@ -31,17 +31,17 @@
 
 class rkv_efcc_config;
 
-  int scb_check_count;                  // Count the number of times the scoreboard comparison pass
-  int scb_check_error;                  // Count the number of times the scoreboard comparison fails
-  int seq_check_count;                  // Count the number of times the sequence comparison pass
-  int seq_check_error;                  // Count the number of times the sequence comparison fails
+  int scb_check_count;                   // Count the number of times the scoreboard comparison pass
+  int scb_check_error;                   // Count the number of times the scoreboard comparison fails
+  int seq_check_count;                   // Count the number of times the sequence comparison pass
+  int seq_check_error;                   // Count the number of times the sequence comparison fails
 
-  int scb_packet_desired_number = 0;    // Desired Packet Number Given from Test/Sequence
-  bit scb_check_enable = 1;             // Overall Enable scoreboard;
-  bit scb_packet_number_check = 1;      // Check Actual and Expected Packet Number Match
-  bit scb_packet_buffer_empty_check = 1;// Check NO Left Packets at Simulation End
+  int scb_packet_desired_number = 0;     // Desired Packet Number Given from Test/Sequence
+  bit scb_check_enable = 1;              // Overall Enable scoreboard;
+  bit scb_packet_number_check = 1;       // Check Actual and Expected Packet Number Match
+  bit scb_packet_buffer_empty_check = 1; // Check NO Left Packets at Simulation End
 
-  time drain_time = 1us; // Simulation Drain Time after Test Finished
+  time drain_time = 1us;                 // Simulation Drain Time after Test Finished
 
 endclass
 

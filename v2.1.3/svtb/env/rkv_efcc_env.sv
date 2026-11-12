@@ -39,7 +39,7 @@ class rkv_efcc_env;
     function new();
     endfunction
 
-    function void build();
+    virtual function void build();
         // apb_init = new();
         apb_mst = new();
         sram_slv = new();
@@ -49,14 +49,14 @@ class rkv_efcc_env;
         scb.build();
     endfunction
     
-    function void connect();
+    virtual function void connect();
         scb.cfg = cfg;
         apb_mst.mon.mon_mb.push_back(scb.apb_mb);
         sram_slv.mon.mon_porta_mb.push_back(scb.sram_porta_mb);
         sram_slv.mon.mon_portb_mb.push_back(scb.sram_portb_mb);
     endfunction
 
-    task run();
+    virtual task run();
         fork
             // apb_init.run();
             apb_mst.run();
@@ -64,6 +64,10 @@ class rkv_efcc_env;
             scb.run();
         join_none
     endtask
+
+    virtual function void check();
+        scb.check();
+    endfunction
 endclass
 
 `endif // RKV_EFCC_ENV_SV

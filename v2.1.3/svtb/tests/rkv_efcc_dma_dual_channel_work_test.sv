@@ -6,6 +6,8 @@ class rkv_efcc_dma_dual_channel_work_test extends rkv_efcc_base_test;
   int unsigned src_addr, dst_addr; // packets loaded & stored with SRAM
 
   function new();
+    super.new();
+    name = "rkv_efcc_dma_dual_channel_work_test";
     src_addr[31:28] = 'h1;
     dst_addr[31:28] = 'h2;
   endfunction

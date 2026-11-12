@@ -6,6 +6,8 @@ class rkv_efcc_dma_directed_test extends rkv_efcc_base_test;
   int unsigned src_addr, dst_addr; // packets loaded & stored with SRAM
 
   function new();
+    super.new();
+    name = "rkv_efcc_dma_directed_test";
     src_addr = 32'h1000;
     dst_addr = 32'h2000;
   endfunction

@@ -36,6 +36,7 @@ module rkv_efcc_tb;
 
   bit clk;
   bit rstn;
+  bit clk_gated;
   int unsigned clk_peroid = 10; // ns, 100MHz
 
   initial begin : clk_gen
@@ -51,7 +52,7 @@ module rkv_efcc_tb;
 
   rkv_efcc_top dut(
   // system signals
-  .clk_i                (clk            ),
+  .clk_i                (clk_gated      ),
   .rstn_i               (rstn           ),
   // apb signals
   .psel_i               (apb_if.psel    ),
@@ -77,6 +78,10 @@ module rkv_efcc_tb;
 
   lvc_apb_interface apb_if(clk, rstn);
   lvc_sram_interface sram_if(clk, clk);
+
+  rkv_efcc_if efcc_if(clk);
+  assign rstn = efcc_if.rstn;                // drive reset
+  assign clk_gated = clk $$ efcc_if.clk_en;  // clk_gating
 
   lvc_apb_master_initiator apb_init;
 
@@ -116,14 +121,19 @@ module rkv_efcc_tb;
                                               rkv_efcc_dma_interrupt_test test = new();
                                               base_test = test;
                                               end
+      "rkv_efcc_reset_test"                   : begin 
+                                              rkv_efcc_reset_test test = new();
+                                              base_test = test;
+                                              end
 
       default: $fatal("Test Name [%s] Unrecognized!", testname);
     endcase
     base_test.build();
     // base_test.apb_vif = apb_if;  // 頂部傳下來給test，test再connect
-    base_test.connect(apb_if, sram_if);      // 頂部傳下來給test，test再connect
+    base_test.connect(apb_if, sram_if, efcc_if);      // 頂部傳下來給test，test再connect
     base_test.run();
     base_test.post_run();  // 就等1us
+    base_test.check();
     base_test.report();
     $finish();
   end
