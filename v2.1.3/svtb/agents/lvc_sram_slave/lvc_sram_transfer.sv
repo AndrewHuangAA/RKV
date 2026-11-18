@@ -1,5 +1,5 @@
-`ifndef LVC_SRAM_TANSFER_SV
-`define LVC_SRAM_TANSFER_SV
+`ifndef LVC_SRAM_TRANSFER_SV
+`define LVC_SRAM_TRANSFER_SV
 
 class lvc_sram_transfer;
   
@@ -12,4 +12,4 @@ class lvc_sram_transfer;
 
 endclass
 
-`endif // LVC_SRAM_TANSFER_SV
+`endif // LVC_SRAM_TRANSFER_SV

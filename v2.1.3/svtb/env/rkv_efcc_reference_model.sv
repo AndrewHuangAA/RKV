@@ -3,9 +3,9 @@
 
 class rkv_efcc_reference_model extends rkv_efcc_subscriber;
 
-  mailbox #(rkv_efcc_transaction) efcc_in_mb;
-  mailbox #(rkv_efcc_transaction) efcc_out_exp_mb; // expected output
-  mailbox #(rkv_efcc_transaction) efcc_out_act_mb; // actual output
+  mailbox #(rkv_efcc_transaction) efcc_in_mb;      // 實際上要送進去硬體的資料，丟進去要進去ref_model的信箱
+  mailbox #(rkv_efcc_transaction) efcc_out_exp_mb; // expected output | 自己模擬的從ref_model出來的資料
+  mailbox #(rkv_efcc_transaction) efcc_out_act_mb; // actual output | 實際上從硬體輸出的資料
 
   mailbox #(rkv_efcc_transaction) flt_mb;
   mailbox #(rkv_efcc_transaction) crc_mb;
@@ -27,10 +27,10 @@ class rkv_efcc_reference_model extends rkv_efcc_subscriber;
   endfunction
 
   task run();
-    super.run();
+    super.run(); // 父類subscriber監聽 apb和sram的數據源源不斷丟進去mailbox
     fork
-      dispatch_mon_efcc(efcc_pio_mb);
-      dispatch_mon_efcc(efcc_dma_mb);
+      dispatch_mon_efcc(efcc_pio_mb); // efcc_pio_mb 是從父類 subscriber 繼承來的，存放剛剛的 pio efcc_tr 資料
+      dispatch_mon_efcc(efcc_dma_mb); // efcc_dma_mb 是從父類 subscriber 繼承來的，存放剛剛的 pio efcc_tr 資料
       ref_flt();
       ref_dp();
       ref_sel();
@@ -42,8 +42,8 @@ class rkv_efcc_reference_model extends rkv_efcc_subscriber;
     forever begin
       mb.get(tr);
       case(tr.trans_kind)
-        PUSH : efcc_in_mb.put(tr);
-        POP  : begin efcc_out_act_mb.put(tr); packet_act_cnt++; end
+        PUSH : efcc_in_mb.put(tr); // 實際上要送進去硬體的資料，丟進去要進去ref_model的信箱
+        POP  : begin efcc_out_act_mb.put(tr); packet_act_cnt++; end // 實際上從硬體輸出的資料
       endcase
     end
   endtask

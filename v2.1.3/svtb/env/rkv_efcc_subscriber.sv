@@ -3,16 +3,15 @@
 
 class rkv_efcc_subscriber;
 
-    // 這些都要給reference_model的mb
-    mailbox #(lvc_apb_transfer) apb_mb;
+    mailbox #(lvc_apb_transfer) apb_mb;           // 接收 APB Monitor 抓到的暫存器讀寫傳輸（對應 PIO 模式）
 
-    mailbox #(rkv_efcc_transaction) efcc_pio_mb;
+    mailbox #(rkv_efcc_transaction) efcc_pio_mb;  // 存放拼裝好的 PIO 模式完整封包
 
-    mailbox #(rkv_efcc_transaction) efcc_dma_mb;
+    mailbox #(rkv_efcc_transaction) efcc_dma_mb;  // 存放拼裝好的 DMA 模式完整封包
 
-    mailbox #(lvc_sram_transfer) sram_porta_mb;
+    mailbox #(lvc_sram_transfer) sram_porta_mb;   // 接收雙埠 SRAM Monitor 抓到的記憶體讀寫傳輸（對應 DMA 模式）
 
-    mailbox #(lvc_sram_transfer) sram_portb_mb;
+    mailbox #(lvc_sram_transfer) sram_portb_mb;   // 接收雙埠 SRAM Monitor 抓到的記憶體讀寫傳輸（對應 DMA 模式）
 
     rkv_efcc_config cfg;
 
@@ -39,9 +38,9 @@ class rkv_efcc_subscriber;
         lvc_apb_transfer apb_tr;
         rkv_efcc_transaction efcc_tr;
         forever begin
-            // Get a APB transfer
+            // Get a APB transfer | 從 apb_monitor 的信箱拿到 apb_tr
             apb_mb.get(apb_tr);
-            // Recognize a PIO TB/RB packet
+            // Recognize a PIO TB/RB packet | 把 apb_tr 弄成 efcc_tr 的格式
             apb_trans_format_packet(apb_tr, efcc_tr);
         end
     endtask
@@ -55,7 +54,7 @@ class rkv_efcc_subscriber;
             case(apb_tr.addr)
                 EFCC_TB_L1DES_REG_ADDR : begin // TB L1DES
                     efcc_tr = new();
-                    if(!efcc_tr.randomize() with {l1des == apb_tr.data;
+                    if(!efcc_tr.randomize() with {l1des == apb_tr.data; // 這裡把apb_tr.data直接丟給l1des，約束又有data_array[0] == l1des，所以不用在data_array[0] = apb_tr.data 一次了
                                                   trans_kind == PUSH;
                                                   trans_mode == PIO;
                                                   addr == EFCC_TB_L1DES_REG_ADDR;
@@ -90,7 +89,8 @@ class rkv_efcc_subscriber;
         end
     endtask
 
-    virtual task write_sram(mailbox #(lvc_sram_transfer) mb);
+    // 這裡要傳參是因為sram的port有分A、B
+    virtual task write_sram(mailbox #(lvc_sram_transfer) mb); 
         lvc_sram_transfer sram_tr;
         rkv_efcc_transaction efcc_tr;
         forever begin
@@ -114,7 +114,7 @@ class rkv_efcc_subscriber;
                     $error("rkv_efcc_transaction object randomize failure!");
             end
         end
-        else if(sram_tr.data[7:0] == 'hED && sram_tr.data[31:16] == 0) begin // TAIL
+        else if(sram_tr.data[7:0] == 'hED && sram_tr.data[31:16] == 0) begin // TAIL 參考rkv_efcc_defines裡面struct的定義
             efcc_tr.tail = sram_tr.data;
             efcc_tr.data_array[efcc_tr.data_array.size() - 1] = efcc_tr.tail;
             if(efcc_tr.l1des.layer2)

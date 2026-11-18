@@ -6,7 +6,7 @@ class lvc_apb_master_monitor;
   virtual lvc_apb_interface vif;
   lvc_apb_transfer mon_tr;
 
-  mailbox #(lvc_apb_transfer) mon_mb[$];
+  mailbox #(lvc_apb_transfer) mon_mb[$]; // Queue的信箱，儲存要丟給subscriber的handle，在rkv_efcc_env裡面連接
 
   task run();
     fork
@@ -21,7 +21,9 @@ class lvc_apb_master_monitor;
     end
   endtask
 
-  task collect_transfer();
+  // 透過interface監測總線，有無 READ or WRITE 動作發生，沒有的話
+  // 就會阻塞，有的話就會接著執行 write_transfer()
+  task collect_transfer(); 
     @(posedge clk_i iff (vif.psel === 1 && vif.penable === 0))
     mon_tr = new();
     mon_tr.addr = vif.paddr;
